@@ -1,0 +1,177 @@
+C51 COMPILER V9.60.0.0   1                                                                 08/30/2021 02:49:33 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE 1
+OBJECT MODULE PLACED IN .\Objects\1.obj
+COMPILER INVOKED BY: D:\Program Files (x86)\Keil_v5\C51\BIN\C51.EXE 1.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRIN
+                    -T(.\Listings\1.lst) TABS(2) OBJECT(.\Objects\1.obj)
+
+line level    source
+
+   1          #include "reg51.h"
+   2          
+   3          #define u8 unsigned char
+   4          #define u16 unsigned int
+   5          
+   6          sbit Water = P1^0;
+   7          sbit USB = P1^4;
+   8          sbit SEGL = P2^0;
+   9          sbit SEGR = P2^1;
+  10          sbit BUTTON1 = P1^1;
+  11          sbit BUTTON2 = P1^2;
+  12          sbit BUTTON3 = P1^3;
+  13          sbit LED1 = P2^4;
+  14          sbit LED2 = P2^5;
+  15          sbit LED3 = P2^6;
+  16          sbit LED4 = P2^7;
+  17          sbit LED5 = P2^3;
+  18          sbit LED6 = P2^2;
+  19          
+  20          //u8 code tab[] = {0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7d, 0x07,0x7f,0x6f,0x77,0x7c,0x39,0x5e,0x79,0x71};
+  21          u8 code tab[] = {0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8, 0x80,0x90,0x88,0x83,0xc6,0xa1,0x86,0x8e};
+  22          u8 Level = 0,LED_Tick = 0;
+  23          u16 FenZhong = 0,MiaoZhong = 0;
+  24          /******************************/
+  25          void Delay_ms(u16 time);
+  26          void Tick(); 
+  27          void initT0(); 
+  28          void Change_Level();
+  29          void SEG_Show();
+  30          void Miao_To_Fen();
+  31          /******************************/
+  32          int main(){
+  33   1        u8 key_up1 = 1,key_up2 = 1;
+  34   1        initT0();
+  35   1        Water = 0;USB = 0;
+  36   1        BUTTON1 = 1;BUTTON2 = 1;BUTTON3 = 1;//BUTTON4 = 1;BUTTON5 = 1;
+  37   1        LED1 = 0;LED2 = 0;LED3 = 0;LED4 = 0;LED5 = 0;LED6 = 0;
+  38   1        while(1){
+  39   2          Change_Level();
+  40   2          if(BUTTON1 == 0 && key_up1 == 1){
+  41   3            Delay_ms(15);
+  42   3            key_up1 = 0;
+  43   3            if(BUTTON1 == 0)
+  44   3              Level++;
+  45   3          }
+  46   2          else if(BUTTON1 == 1)
+  47   2            key_up1 = 1;
+  48   2          
+  49   2          if(BUTTON2 == 0)
+  50   2            Level = 5;
+  51   2          if(BUTTON3 == 0 && key_up2 == 1){
+  52   3            Delay_ms(15);
+  53   3            key_up2 = 0;
+  54   3            if(BUTTON3 == 0)
+C51 COMPILER V9.60.0.0   1                                                                 08/30/2021 02:49:33 PAGE 2   
+
+  55   3              USB = ~USB;
+  56   3          }
+  57   2          else if(BUTTON3 == 1)
+  58   2            key_up2 = 1;
+  59   2          
+  60   2          SEG_Show();
+  61   2          Miao_To_Fen();
+  62   2        }
+  63   1      }
+  64          
+  65          void Miao_To_Fen(){
+  66   1        if(MiaoZhong >= 60){
+  67   2          MiaoZhong = 0;
+  68   2          FenZhong++;
+  69   2        }
+  70   1      }
+  71          
+  72          void SEG_Show(){
+  73   1        u8 ShiWei,GeWei;
+  74   1        ShiWei = FenZhong /10;
+  75   1        GeWei = FenZhong % 10;
+  76   1        P0 = tab[ShiWei];
+  77   1        SEGL = 1;Delay_ms(10);SEGL = 0;
+  78   1        P0 = tab[GeWei];
+  79   1        SEGR = 1;Delay_ms(10);SEGR = 0;
+  80   1      }
+  81          
+  82          void Change_Level(){
+  83   1        if(Level == 0){
+  84   2          Water = 0;
+  85   2          LED1 = 0;LED2 = 0;LED3 = 0;LED4 = 0;LED5 = 1;
+  86   2        }
+  87   1        
+  88   1        if(Level == 1){
+  89   2          LED1 = 1;LED2 = 0;LED3 = 0;LED4 = 0;LED5 = 0;
+  90   2          if(FenZhong >= 15){
+  91   3            FenZhong = 0;
+  92   3            Water = 1;Delay_ms(1500);Water = 0;
+  93   3          }
+  94   2        }
+  95   1        
+  96   1        if(Level == 2){
+  97   2          LED1 = 0;LED2 = 1;LED3 = 0;LED4 = 0;LED5 = 0;
+  98   2          if(FenZhong >= 15){
+  99   3            FenZhong = 0;
+ 100   3            Water = 1;Delay_ms(3000);Water = 0;
+ 101   3          }
+ 102   2        }
+ 103   1        
+ 104   1        if(Level == 3){
+ 105   2          LED1 = 0;LED2 = 0;LED3 = 1;LED4 = 0;LED5 = 0;
+ 106   2          if(FenZhong >= 15){
+ 107   3            FenZhong = 0;
+ 108   3            Water = 1;Delay_ms(6000);Water = 0;
+ 109   3          }
+ 110   2        }
+ 111   1        
+ 112   1        if(Level == 4)
+ 113   1          Level = 0;
+ 114   1        
+ 115   1        if(Level == 5){
+ 116   2          LED1 = 0;LED2 = 0;LED3 = 0;LED4 = 1;LED5 = 0;
+C51 COMPILER V9.60.0.0   1                                                                 08/30/2021 02:49:33 PAGE 3   
+
+ 117   2          Water = 1;Delay_ms(15000);Water = 0;
+ 118   2          Level = 0;
+ 119   2          FenZhong = 0;
+ 120   2          Delay_ms(200);
+ 121   2        }
+ 122   1      }
+ 123          
+ 124          void Tick() interrupt 1 {
+ 125   1        u16 num;
+ 126   1        TH0 = (65536 - 10000) / 256;
+ 127   1        TL0 = (65536 - 10000) % 256;
+ 128   1        num++;
+ 129   1        if(num == 100){
+ 130   2          num = 0;
+ 131   2          MiaoZhong++;
+ 132   2          LED6 = ~LED6;
+ 133   2        }
+ 134   1      }
+ 135          
+ 136          void initT0(){
+ 137   1        TMOD = 0x01;
+ 138   1        TH0 = (65536 - 10000) / 256;
+ 139   1        TL0 = (65536 - 10000) % 256;
+ 140   1        EA = 1;
+ 141   1        ET0 = 1;
+ 142   1        TR0 = 1;
+ 143   1      }
+ 144          
+ 145          void Delay_ms(u16 time){
+ 146   1        u16 i,j;
+ 147   1        for(i = 0;i < time;i++)
+ 148   1          for(j = 0;j < 110;j++);
+ 149   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    485    ----
+   CONSTANT SIZE    =     16    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      6       5
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
